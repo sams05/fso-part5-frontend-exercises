@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,6 +12,8 @@ const App = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -25,15 +28,33 @@ const App = () => {
     }
   }, [])
 
+  const showNotification = (message, isError = false, time = 5000) => {
+    setMessage(message)
+    setError(isError)
+    setTimeout(() => {
+      setMessage('')
+    }, time)
+  }
+
   const handleLogin = async (e) => {
     e.preventDefault()
 
-    const user = await loginService.login({ username, password })
-    setUser(user)
-    window.localStorage.setItem('blogAppUser', JSON.stringify(user))
-    blogService.setToken(user.token)
-    setUsername('')
-    setPassword('')
+    try {
+      const user = await loginService.login({ username, password })
+      setUser(user)
+      window.localStorage.setItem('blogAppUser', JSON.stringify(user))
+      blogService.setToken(user.token)
+      setUsername('')
+      setPassword('')
+    } catch (error) {
+      if (error.response?.data?.error) {
+        if (error.response.data.error === 'invalid username or password') {
+          return showNotification('wrong username or password', true)
+        }
+        return showNotification(error.response.data.error, true)
+      }
+      showNotification(error.message, true)
+    }
   }
 
   const handleLogout = () => {
@@ -45,8 +66,19 @@ const App = () => {
   const handleNewBlog = async (e) => {
     e.preventDefault()
 
-    const newBlog = await blogService.create({ title, author, url })
-    setBlogs(blogs.concat(newBlog))
+    try {
+      const newBlog = await blogService.create({ title, author, url })
+      setBlogs(blogs.concat(newBlog))
+      showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    } catch (error) {
+      if (error.response?.data?.error) {
+        return showNotification(error.response.data.error, true)
+      }
+      showNotification(error.message, true)
+    }
   }
 
   const main = () => {
@@ -54,6 +86,7 @@ const App = () => {
       return (
         <div>
           <h2>log in to application</h2>
+          <Notification message={message} isError={error} />
           <form onSubmit={handleLogin}>
             <div>
               username
@@ -72,6 +105,7 @@ const App = () => {
     return (
       <div>
         <h2>blogs</h2>
+        <Notification message={message} isError={error} />
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
         <h2>create new</h2>
