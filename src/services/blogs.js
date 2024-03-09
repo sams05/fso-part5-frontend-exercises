@@ -18,4 +18,10 @@ const create = async (newBlog) => {
   return response.data
 }
 
-export default { setToken, getAll, create }
+const update = async (id, updatedBlog) => {
+  const config = { headers: { Authorization: `Bearer ${token}` } }
+  const response = await axios.put(`${baseUrl}/${id}`, updatedBlog, config)
+  return response.data
+}
+
+export default { setToken, getAll, create, update }
