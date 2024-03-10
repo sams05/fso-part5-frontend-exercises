@@ -1,4 +1,5 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
 describe('<Blog>', () => {
@@ -18,7 +19,9 @@ describe('<Blog>', () => {
     }
     const updateBlog = vi.fn()
     const deleteBlog = vi.fn()
-    container = render(<Blog loggedInUser={loggedInUser} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />).container
+    container = render(
+      <Blog loggedInUser={loggedInUser} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
+    ).container
   })
 
   test('Shows just title and author by default', () => {
@@ -27,5 +30,14 @@ describe('<Blog>', () => {
 
     expect(blogHeading).not.toHaveStyle('display: none')
     expect(blogDetails).toHaveStyle('display: none')
+  })
+
+  test('Shows blog details when the view button is clicked', async () => {
+    const user = userEvent.setup()
+    // Make sure button is labeled "view" when details are hidden
+    const viewToggleBtn = screen.getByText('view')
+    await user.click(viewToggleBtn)
+    const blogDetails = container.querySelector('.blog-details')
+    expect(blogDetails).not.toHaveStyle('display: none')
   })
 })
