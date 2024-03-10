@@ -2,8 +2,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
-describe('<Blog>', () => {
+describe('<Blog />', () => {
   let container
+  let updateBlog
+  let deleteBlog
   beforeEach(() => {
     const loggedInUser = { token: 'akljagwlrq', username: 'Bret', name: 'Leanne Graham' }
     const blog = {
@@ -17,8 +19,8 @@ describe('<Blog>', () => {
         id: 'jkh326kj4v',
       },
     }
-    const updateBlog = vi.fn()
-    const deleteBlog = vi.fn()
+    updateBlog = vi.fn()
+    deleteBlog = vi.fn()
     container = render(
       <Blog loggedInUser={loggedInUser} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
     ).container
@@ -39,5 +41,13 @@ describe('<Blog>', () => {
     await user.click(viewToggleBtn)
     const blogDetails = container.querySelector('.blog-details')
     expect(blogDetails).not.toHaveStyle('display: none')
+  })
+
+  test('Like button calls its event handler multiple times on consecutive hits', async () => {
+    const user = userEvent.setup()
+    const likeBtn = screen.getByText('like')
+    await user.click(likeBtn)
+    await user.click(likeBtn)
+    expect(updateBlog.mock.calls).toHaveLength(2)
   })
 })
