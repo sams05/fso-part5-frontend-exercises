@@ -109,7 +109,7 @@ const App = () => {
         <div>
           <h2>log in to application</h2>
           <Notification message={message} isError={error} />
-          <form onSubmit={handleLogin}>
+          <form data-testid="login-form" onSubmit={handleLogin}>
             <div>
               username
               <input type="text" value={username} onChange={({ target }) => setUsername(target.value)} />

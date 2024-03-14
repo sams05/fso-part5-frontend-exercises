@@ -40,12 +40,12 @@ const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      <div className='blog-heading'>
+    <div style={blogStyle} data-testid="blog">
+      <div className="blog-heading">
         {blog.title} {blog.author}
         <button onClick={() => setDetailVisible(!detailVisible)}>{detailVisible ? 'hide' : 'view'}</button>
       </div>
-      <div style={showWhenVisible} className='blog-details'>
+      <div style={showWhenVisible} className="blog-details">
         <p style={pStyle}>{blog.url}</p>
         <p style={pStyle}>
           likes {blog.likes} <button onClick={incrementLikes}>like</button>
